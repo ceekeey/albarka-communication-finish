@@ -1,11 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { FaHome, FaList, FaBox, FaSignOutAlt, FaWrench } from "react-icons/fa";
+import { FaHome, FaList, FaBox, FaSignOutAlt, FaWrench, FaPhone } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/authContext";
 
 const AdminSideBar = () => {
-    const handleLogout = () => {
-        console.log("Logout clicked");
-    };
+    const { logout } = useAuth();
+
 
     // Framer Motion variants for links
     const linkVariants = {
@@ -44,6 +44,27 @@ const AdminSideBar = () => {
                             >
                                 <FaHome className="text-lg" />
                                 <span>Dashboard</span>
+                            </motion.div>
+                        )}
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink
+                        to="/admin/contact"
+                        className={({ isActive }) =>
+                            `block p-2 rounded flex items-center space-x-2 transition-colors ${isActive ? "bg-orange-500 text-white" : "hover:bg-orange-500"
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <motion.div
+                                variants={linkVariants}
+                                whileHover="hover"
+                                whileTap="tap"
+                                className="flex items-center space-x-2 w-full"
+                            >
+                                <FaPhone className="text-lg" />
+                                <span>Contacts</span>
                             </motion.div>
                         )}
                     </NavLink>
@@ -113,7 +134,7 @@ const AdminSideBar = () => {
                 </li>
                 <li>
                     <motion.button
-                        onClick={handleLogout}
+                        onClick={logout}
                         className="w-full text-left p-2 rounded flex items-center space-x-2 hover:bg-orange-500 transition-colors"
                         variants={linkVariants}
                         whileHover="hover"

@@ -38,7 +38,7 @@ export default function Products() {
           throw new Error("Failed to fetch products");
         }
         const result = await response.json();
-        setProducts(result.data); // Assuming the API returns { message, data: [{ _id, name, category, rating, ... }, ...] }
+        setProducts(result.data);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -50,14 +50,21 @@ export default function Products() {
   }, []);
 
   const filteredProducts = products.filter((p) => {
+    const productCategory =
+      typeof p.category === "string" ? p.category : p.category?.name;
+
     const matchCategory =
-      filters.category === "All" || p.category === filters.category;
+      filters.category === "All" || productCategory === filters.category;
+
     const matchRating = filters.rating === 0 || p.rating >= filters.rating;
+
     const matchSearch =
       filters.search === "" ||
-      p.name?.toLowerCase().includes(filters.search.toLowerCase()); // Assuming product has a 'name' field
+      p.name?.toLowerCase().includes(filters.search.toLowerCase());
+
     return matchCategory && matchRating && matchSearch;
   });
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">

@@ -1,17 +1,19 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { FaSpinner } from "react-icons/fa";
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const BASE_URL = 'http://localhost:5000';
-  const navigate = useNavigate();
 
+  // handle for submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true)
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -20,14 +22,18 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      console.log(data);
+      setLoading(false)
       if (data.message) {
-        toast.success(data.error);
-        // navigate('/admin/home');
+        toast.success(data.message);
+        location.href = '/admin/home';
+
+        // set token from api to localstorage
+        localStorage.setItem("token", data.token)
       }
       if (data.error) {
         throw new Error(data.error);
       }
+      setLoading(false)
     } catch (error) {
       toast.error(error.message);
     }
@@ -79,16 +85,16 @@ const Login = () => {
               />
             </div>
             <div className="flex items-center justify-between">
-              <a href="#" className="text-sm text-orange-600 hover:underline">
+              <Link to="#" className="text-sm text-orange-600 hover:underline">
                 Forgot Password?
-              </a>
+              </Link>
             </div>
             <button
               type="button"
               onClick={handleSubmit}
-              className="w-full py-2 px-4 bg-orange-600 text-white font-semibold rounded-md shadow hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2"
+              className="w-full px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 flex justify-center items-center"
             >
-              {loading ? 'Loading...' : 'Sign In'}
+              {loading ? (<FaSpinner className="animate-spin text-lg" />) : 'Sign In'}
             </button>
           </div>
 

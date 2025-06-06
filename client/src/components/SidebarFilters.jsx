@@ -2,6 +2,8 @@ import {
     MagnifyingGlassIcon,
     CheckCircleIcon,
 } from "@heroicons/react/24/outline";
+import { FaHome } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function SidebarFilters({ filters, setFilters, categories }) {
     const handleSearchChange = (e) => {
@@ -10,9 +12,11 @@ export default function SidebarFilters({ filters, setFilters, categories }) {
 
     return (
         <aside className="w-full md:w-72 p-6 bg-white shadow-lg rounded-r-3xl border-r transition-all duration-300 min-h-screen">
-            {/* Logo */}
-            <div className="flex items-center gap-3 mb-8">
-                <h1 className="text-2xl font-bold text-orange-600 tracking-wide">Albarka Communication</h1>
+            <div className="flex items-center gap-3 mb-8 text-orange-600">
+                <Link to={'/'}>
+                    <FaHome size={40} className="text-orange-600" />
+                </Link>
+                Home
             </div>
 
             {/* Search */}

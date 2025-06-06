@@ -7,6 +7,8 @@ import productRouter from "./routes/productRoute.js";
 import connectDb from "./db/config.js";
 import authRouter from "./routes/authRoute.js";
 import categoryRouter from "./routes/categoryRoute.js";
+import contactRouter from "./routes/contactRoutes.js";
+import bannerRouter from "./routes/bannerRoute.js";
 
 const app = express();
 app.use(cors());
@@ -20,6 +22,8 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRouter);
 app.use("/api/stock", productRouter);
 app.use("/api/catigory", categoryRouter);
+app.use("/api/contact", contactRouter);
+app.use("/api/banner", bannerRouter);
 
 app.listen(5000, () => {
   console.log("server running");

@@ -5,13 +5,16 @@ import './index.css'
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import App from './App.jsx'
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/authContext.jsx';
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-    <Toaster />
+    <AuthProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+      <Toaster />
+    </AuthProvider>
   </StrictMode>,
 )
