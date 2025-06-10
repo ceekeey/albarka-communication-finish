@@ -2,6 +2,7 @@ import sharp from "sharp";
 import path from "path";
 import fs from "fs/promises";
 import Stock from "../models/StockModel.js";
+import Category from "../models/CategoryModel.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,7 +33,7 @@ export const deleteStock = async (req, res) => {
       // Construct the image path
       const imagePath = stock.image.includes("uploads/")
         ? path.join(__dirname, "../", stock.image) // If image includes 'uploads/'
-        : path.join(__dirname, "../Uploads", stock.image); // If image is just filename
+        : path.join(__dirname, "../uploads", stock.image); // If image is just filename
       console.log(`Attempting to delete image at: ${imagePath}`);
 
       try {
@@ -111,7 +112,7 @@ export const addStock = async (req, res) => {
 
 export const getStock = async (req, res) => {
   try {
-    const stocks = await Stock.find();
+    const stocks = await Stock.find().sort({ periority: 1 });
     res
       .status(200)
       .json({ message: "All stocks fetched successfully", data: stocks });
@@ -124,7 +125,7 @@ export const getStock = async (req, res) => {
 export const getAllStocks = async (req, res) => {
   try {
     const stocks = await Stock.find()
-      .sort({ createdAt: -1 }) // Sort by most recent
+      .sort({ periority: 1 }) // Sort by most recent
       .limit(9) // Limit to 10 results
       .populate("catigoryid", "name");
     res
@@ -139,7 +140,7 @@ export const getAllStocks = async (req, res) => {
 export const getAllStocksUser = async (req, res) => {
   try {
     const stocks = await Stock.find()
-      .sort({ periority: -1 }) // Sort by most recent
+      .sort({ periority: 1 }) // Sort by most recent
       .limit(9) // Limit to 10 results
       .populate("catigoryid", "name");
     res
@@ -155,10 +156,9 @@ export const getAllStocksAdmin = async (req, res) => {
   const { categoryId } = req.params;
 
   try {
-    const stocks = await Stock.find({ catigoryid: categoryId }).populate(
-      "catigoryid",
-      "name"
-    );
+    const stocks = await Stock.find({ catigoryid: categoryId })
+      .sort({ periority: 1 })
+      .populate("catigoryid", "name");
     res
       .status(200)
       .json({ message: "All stocks fetched successfully", data: stocks });
@@ -220,5 +220,54 @@ export const updateStock = async (req, res) => {
     res
       .status(500)
       .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+export const getStocksByCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    // Validate category ID
+    if (!categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid category ID format",
+        data: [],
+      });
+    }
+
+    // Check if category exists
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
+        data: [],
+      });
+    }
+
+    // Fetch stocks by category ID
+    const stocks = await Stock.find({ catigoryid: categoryId }).populate(
+      "catigoryid",
+      "name"
+    );
+
+    // If no stocks found, return empty array with message
+    if (!stocks || stocks.length === 0) {
+      return res.status(200).json({
+        message: "No stocks found for this category",
+        data: [],
+      });
+    }
+
+    // Return stocks
+    return res.status(200).json({
+      message: "Stocks retrieved successfully",
+      data: stocks,
+    });
+  } catch (error) {
+    console.error("Error fetching stocks by category:", error);
+    return res.status(500).json({
+      message: "Server error while fetching stocks",
+      data: [],
+    });
   }
 };

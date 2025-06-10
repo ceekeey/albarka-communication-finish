@@ -10,6 +10,11 @@ export default function SidebarFilters({ filters, setFilters, categories }) {
         setFilters({ ...filters, search: e.target.value });
     };
 
+    const handleCategoryClick = (cat) => {
+        console.log("Selected Category ID:", cat.id); // Log category ID to console
+        setFilters({ ...filters, category: { name: cat.name, id: cat.id } });
+    };
+
     return (
         <aside className="w-full md:w-72 p-6 bg-white shadow-lg rounded-r-3xl border-r transition-all duration-300 min-h-screen">
             <div className="flex items-center gap-3 mb-8 text-orange-600">
@@ -36,17 +41,17 @@ export default function SidebarFilters({ filters, setFilters, categories }) {
                 <h3 className="text-lg font-semibold text-gray-700 mb-3">Category</h3>
                 <div className="space-y-2">
                     {categories.map((cat) => {
-                        const selected = filters.category === cat;
+                        const selected = filters.category.name === cat.name;
                         return (
                             <button
-                                key={cat}
+                                key={cat.id || cat.name} // Use id if available, fallback to name for "All"
                                 className={`w-full flex items-center justify-between px-4 py-2 rounded-lg transition-all duration-300 ${selected
                                     ? "bg-orange-100 text-orange-700 ring-2 ring-orange-300 shadow-sm"
                                     : "hover:bg-orange-50 text-gray-700"
                                     }`}
-                                onClick={() => setFilters({ ...filters, category: cat })}
+                                onClick={() => handleCategoryClick(cat)}
                             >
-                                {cat}
+                                {cat.name}
                                 {selected && (
                                     <CheckCircleIcon className="w-5 h-5 text-orange-500 transform scale-100 animate-pulse" />
                                 )}

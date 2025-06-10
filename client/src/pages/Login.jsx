@@ -96,6 +96,9 @@ const Login = () => {
             >
               {loading ? (<FaSpinner className="animate-spin text-lg" />) : 'Sign In'}
             </button>
+            <div className="flex justify-center">
+              <Link className="text-orange-600 text-center text-sm" to={'/'}>Back to Home</Link>
+            </div>
           </div>
 
         </div>

@@ -3,9 +3,46 @@ import { FiPhone, FiMail, FiMapPin } from 'react-icons/fi';
 import Navbar from './../components/Navbar';
 import Footer from '../components/Footer';
 import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const Contact = () => {
     const { id: productId } = useParams();
+    const [contactInfo, setContactInfo] = useState({
+        phone: '+234 123 456 7890',
+        email: 'support@yourcompany.com',
+        address: 'Gombe State University, Gombe, Nigeria',
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const getLocation = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/links/get-location');
+            if (!res.ok) throw new Error('Failed to fetch contact info');
+            const data = await res.json();
+            // Process array to map icon to corresponding contact info
+            const newContactInfo = {
+                phone: '+234 123 456 7890', // Fallback
+                email: 'support@yourcompany.com', // Fallback
+                address: 'Gombe State University, Gombe, Nigeria', // Fallback
+            };
+            data.forEach(item => {
+                if (item.icon === 'phone') newContactInfo.phone = `+234 ${item.link}` || newContactInfo.phone;
+                if (item.icon === 'email') newContactInfo.email = item.link || newContactInfo.email;
+                if (item.icon === 'location') newContactInfo.address = item.link || newContactInfo.address;
+            });
+            setContactInfo(newContactInfo);
+            setLoading(false);
+        } catch (error) {
+            console.error(error);
+            setError('Could not load contact information');
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getLocation();
+    }, []);
 
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-50">
@@ -13,7 +50,7 @@ const Contact = () => {
 
             <main className="flex-grow px-6 md:px-20 py-16">
                 <motion.section
-                    className="max-w-5xl mx-auto bg  -white backdrop-blur-md bg-opacity-60 shadow-2xl rounded-2xl p-10"
+                    className="max-w-5xl mx-auto bg-white backdrop-blur-md bg-opacity-60 shadow-2xl rounded-2xl p-10"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -31,14 +68,12 @@ const Contact = () => {
                             className="space-y-6"
                             onSubmit={async (e) => {
                                 e.preventDefault();
-                                // TODO: integrate with email/API
                                 const formData = {
                                     name: e.target.name.value,
                                     email: e.target.email.value,
                                     phone: e.target.phone.value,
                                     message: e.target.message.value,
-                                    productId
-                                    // Optional: include productId from query param or props if needed
+                                    productId,
                                 };
                                 try {
                                     const res = await fetch('http://localhost:5000/api/contact', {
@@ -99,8 +134,6 @@ const Contact = () => {
                                     </label>
                                 </div>
                             ))}
-
-
                             <button
                                 type="submit"
                                 className="w-full py-4 bg-orange-600 text-white font-semibold rounded-lg shadow-lg transform hover:scale-105 transition-transform"
@@ -116,25 +149,31 @@ const Contact = () => {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5, duration: 0.6 }}
                         >
-                            <div className="flex items-center space-x-4">
-                                <FiPhone className="text-orange-600" size={24} />
-                                <span className="text-gray-600 font-medium">+234 123 456 7890</span>
-                            </div>
-                            <div className="flex items-center space-x-4">
-                                <FiMail className="text-orange-600" size={24} />
-                                <span className="text-gray-600 font-medium">support@yourcompany.com</span>
-                            </div>
-                            <div className="flex items-center space-x-4">
-                                <FiMapPin className="text-orange-600" size={24} />
-                                <span className="text-gray-600 font-medium">
-                                    Gombe State University, Gombe, Nigeria
-                                </span>
-                            </div>
+                            {loading ? (
+                                <p>Loading contact info...</p>
+                            ) : error ? (
+                                <p className="text-red-600">{error}</p>
+                            ) : (
+                                <>
+                                    <div className="flex items-center space-x-4">
+                                        <FiPhone className="text-orange-600" size={24} />
+                                        <span className="text-gray-600 font-medium">{contactInfo.phone}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <FiMail className="text-orange-600" size={24} />
+                                        <span className="text-gray-600 font-medium">{contactInfo.email}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <FiMapPin className="text-orange-600" size={24} />
+                                        <span className="text-gray-600 font-medium">{contactInfo.address}</span>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="rounded-xl overflow-hidden shadow-inner h-64">
                                 <iframe
                                     title="Office Location"
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126743.44774855024!2d7.2097540964540235!3d10.28945077717219!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e0b1d387caf9f%3A0x7f1ef9bd05aae2a8!2sGombe%20State%20University!5e0!3m2!1sen!2sng!4v1616587595840!5m2!1sen!2sng"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d252516.4187146934!2d7.297506803409057!3d9.081999008720904!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e745f4cd62c2b%3A0x53e7e1d077f6fa3e!2sAbuja%2C%20Federal%20Capital%20Territory%2C%20Nigeria!5e0!3m2!1sen!2sng!4v1698765432109!5m2!1sen!2sng"
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}
@@ -147,12 +186,9 @@ const Contact = () => {
                 </motion.section>
             </main>
 
-            {/* Modern Footer */}
             <Footer />
         </div>
     );
 };
 
 export default Contact;
-
-// Dependencies: react-icons, framer-motion

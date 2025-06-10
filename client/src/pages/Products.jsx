@@ -3,9 +3,9 @@ import SidebarFilters from "../components/SidebarFilters";
 import ProductCard from "../components/ProductCard";
 
 export default function Products() {
-  const [filters, setFilters] = useState({ category: "All", rating: 0, search: "" });
+  const [filters, setFilters] = useState({ category: { name: "All", id: null }, rating: 0, search: "" });
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState(["All"]);
+  const [categories, setCategories] = useState([{ name: "All", id: null }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,9 +18,8 @@ export default function Products() {
           throw new Error("Failed to fetch categories");
         }
         const result = await response.json();
-        // Assuming API returns { message, data: [{ name: "Category1" }, { name: "Category2" }, ...] }
-        const categoryNames = result.data.map((cat) => cat.name);
-        setCategories(["All", ...categoryNames]);
+        const categoryList = [{ name: "All", id: null }, ...result.data.map(cat => ({ id: cat._id, name: cat.name }))];
+        setCategories(categoryList);
       } catch (err) {
         setError(err.message);
       }
@@ -29,11 +28,16 @@ export default function Products() {
     fetchCategories();
   }, []);
 
-  // Fetch products
+  // Fetch products based on selected category
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/stock/all-stock-products");
+        setLoading(true);
+        const url = filters.category.id
+          ? `http://localhost:5000/api/stock/stocks-by-category/${filters.category.id}`
+          : "http://localhost:5000/api/stock/all-stock-products";
+
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error("Failed to fetch products");
         }
@@ -47,24 +51,18 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, []);
+  }, [filters.category.id]); // Re-fetch when category ID changes
 
   const filteredProducts = products.filter((p) => {
-    const productCategory =
-      typeof p.category === "string" ? p.category : p.category?.name;
-
+    const productCategory = typeof p.category === "string" ? p.category : p.category?.name;
     const matchCategory =
-      filters.category === "All" || productCategory === filters.category;
-
-    const matchRating = filters.rating === 0 || p.rating >= filters.rating;
-
+      filters.category.name === "All" || productCategory === filters.category.name;
     const matchSearch =
       filters.search === "" ||
       p.name?.toLowerCase().includes(filters.search.toLowerCase());
 
-    return matchCategory && matchRating && matchSearch;
+    return matchCategory && matchSearch;
   });
-
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
@@ -85,9 +83,11 @@ export default function Products() {
             <h1 className="text-3xl font-bold mb-4 text-orange-600 underline decoration-orange-400">
               Our Products
             </h1>
-            {/* Display current filter context */}
             <p className="text-gray-700 mb-6 text-lg">
-              Showing products for: <span className="font-semibold text-orange-600">{filters.category}</span>
+              Showing products for: <span className="font-semibold text-orange-600">{filters.category.name}</span>
+              {filters.category.id && (
+                <span> (ID: {filters.category.id})</span>
+              )}
               {filters.search && (
                 <>
                   {" "}matching <span className="font-semibold text-orange-600">"{filters.search}"</span>

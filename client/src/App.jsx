@@ -12,15 +12,18 @@ import AdminManageWebsite from './pages/AdminManageWebsite';
 import AdminBanners from './pages/AdminBanners';
 
 import PrivateRoute from './context/PrivateRoute';
+import ManageContact from './pages/ManageContact';
+import ShopLoginPage from './pages/ShopLogin';
 const App = () => {
   return (
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/shop-login/:id" element={<ShopLoginPage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/contact/:id" element={<Contact />} />
         <Route path="/products" element={<Products />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login/:id" element={<Login />} />
         {/* private routes */}
         <Route
           path="/admin/home"
@@ -59,6 +62,15 @@ const App = () => {
         />
 
         <Route
+          path="/admin/manage-contact"
+          element={
+            <PrivateRoute>
+              <ManageContact />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/admin/manage-catigory"
           element={
             <PrivateRoute>
@@ -77,8 +89,7 @@ const App = () => {
           }
         />
         <Route
-          path="/admin/manage-stocks/:
-          categoryId" element={
+          path="/admin/manage-stocks/:categoryId" element={
             <PrivateRoute>
               <ManageStock />
             </PrivateRoute>
